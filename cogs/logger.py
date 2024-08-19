@@ -1,3 +1,4 @@
+import datetime
 import discord
 from discord.ext import commands
 import yaml
@@ -27,6 +28,22 @@ class Logger(commands.Cog):
         )
 
         embed.set_footer(text=f"Joined at: {joined_at}")
+
+        await join_leave_channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_member_remove(self, member):
+        join_leave_channel = self.bot.get_channel(
+            config["configuration"]["join-leave-channel"]
+        )
+        title = "Member Left"
+        description = f"Goodbye {member.mention}!\n\nWe hope to see you again soon!"
+
+        embed = discord.Embed(
+            title=title,
+            description=description,
+            color=discord.Color.red(),
+        )
 
         await join_leave_channel.send(embed=embed)
 
