@@ -13,13 +13,14 @@ PREFIX = config["discord"]["prefix"]
 # Initialize the bot with intents and command prefix
 intents = discord.Intents.default()
 intents.message_content = True
+intents.members = True
 
 bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 
 
 # Load the cogs (command sets)
 async def load_cogs():
-    cogs = ["cogs.configure", "cogs.moderator", "cogs.user"]
+    cogs = ["cogs.configure", "cogs.moderator", "cogs.user", "cogs.logger"]
     for cog in cogs:
         await bot.load_extension(cog)
 
