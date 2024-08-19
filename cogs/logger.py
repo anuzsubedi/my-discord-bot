@@ -2,6 +2,8 @@ import datetime
 import discord
 from discord.ext import commands
 import yaml
+from datetime import datetime
+import pytz
 
 # Load the configuration from the YAML file
 with open("config.yaml", "r") as file:
@@ -19,7 +21,7 @@ class Logger(commands.Cog):
         )
 
         title = "Member Joined"
-        description = f"Welcome {member.mention} to the server!\n\nPlease familiarize yourself with the rules and enjoy your stay!"
+        description = f"Welcome {member.mention} to the server!\nPlease familiarize yourself with the rules and enjoy your stay!"
         joined_at = member.joined_at.strftime("%Y-%m-%d %H:%M")
         embed = discord.Embed(
             title=title,
@@ -46,39 +48,44 @@ class Logger(commands.Cog):
         if member.joined_at is None:
             return
 
-        # Calculate the time the member was in the server
-        current_time = datetime.now(datetime.timezone.utc)
-        join_time = member.joined_at
+        try:
+            left_after = "1 day."
+            # Calculate time difference
+            joined_at = member.joined_at.astimezone(pytz.UTC)
+            now = datetime.now(pytz.UTC)
+            difference = now - joined_at
 
-        # Calculate the difference
-        time_difference = current_time - join_time
+            # Determine time format
+            total_seconds = difference.total_seconds()
+            days = difference.days
+            hours = int(total_seconds // 3600) % 24
+            minutes = int(total_seconds // 60) % 60
 
-        # Break down the time difference into years, days, hours, and minutes
-        years, remainder = divmod(time_difference.total_seconds(), 365 * 24 * 3600)
-        days, remainder = divmod(remainder, 24 * 3600)
-        hours, remainder = divmod(remainder, 3600)
-        minutes, _ = divmod(remainder, 60)
+            if days >= 365:
+                years = days // 365
+                days_remaining = days % 365
+                left_after = f"{years} years. {days_remaining} days."
+            elif days > 1:
+                left_after = f"{days} days. {hours} hours. {minutes} minutes."
+            elif days == 1:
+                left_after = f"1 day. {hours} hours. {minutes} minutes."
+            elif hours > 0:
+                left_after = f"{hours} hours. {minutes} minutes."
+            else:
+                left_after = f"{minutes} minutes."
 
-        # Format the output based on the largest relevant time unit
-        if years >= 1:
-            left_after = f"{int(years)} years, {int(days)} days"
-        elif days >= 1:
-            left_after = f"{int(days)} days, {int(hours)} hours"
-        elif hours >= 1:
-            left_after = f"{int(hours)} hours and {int(minutes)} minutes"
-        else:
-            left_after = f"{int(minutes)} minutes"
+            # Create the embed message
+            embed = discord.Embed(
+                title="Member Left",
+                description=f"Goodbye {member.mention}!\nWe hope to see you again soon!",
+                color=discord.Color.red(),
+            )
+            embed.set_footer(text=f"{member.name} was here for {left_after}")
 
-        # Create the embed message
-        embed = discord.Embed(
-            title="Member Left",
-            description=f"Goodbye {member.mention}!\n\nWe hope to see you again soon!",
-            color=discord.Color.red(),
-        )
-        embed.set_footer(text=f"{member.name} was here for {left_after}")
-
-        # Send the embed message
-        await join_leave_channel.send(embed=embed)
+            # Send the embed message
+            await join_leave_channel.send(embed=embed)
+        except Exception as e:
+            print(f"An error occurred: {e}")
 
 
 async def setup(bot):
