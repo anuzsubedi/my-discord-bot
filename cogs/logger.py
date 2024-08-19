@@ -33,18 +33,51 @@ class Logger(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
+        # Retrieve the join/leave channel from the configuration
         join_leave_channel = self.bot.get_channel(
             config["configuration"]["join-leave-channel"]
         )
-        title = "Member Left"
-        description = f"Goodbye {member.mention}!\n\nWe hope to see you again soon!"
 
+        # Ensure the channel is valid
+        if join_leave_channel is None:
+            return
+
+        # Ensure the member's join date is available
+        if member.joined_at is None:
+            return
+
+        # Calculate the time the member was in the server
+        current_time = datetime.now(datetime.timezone.utc)
+        join_time = member.joined_at
+
+        # Calculate the difference
+        time_difference = current_time - join_time
+
+        # Break down the time difference into years, days, hours, and minutes
+        years, remainder = divmod(time_difference.total_seconds(), 365 * 24 * 3600)
+        days, remainder = divmod(remainder, 24 * 3600)
+        hours, remainder = divmod(remainder, 3600)
+        minutes, _ = divmod(remainder, 60)
+
+        # Format the output based on the largest relevant time unit
+        if years >= 1:
+            left_after = f"{int(years)} years, {int(days)} days"
+        elif days >= 1:
+            left_after = f"{int(days)} days, {int(hours)} hours"
+        elif hours >= 1:
+            left_after = f"{int(hours)} hours and {int(minutes)} minutes"
+        else:
+            left_after = f"{int(minutes)} minutes"
+
+        # Create the embed message
         embed = discord.Embed(
-            title=title,
-            description=description,
+            title="Member Left",
+            description=f"Goodbye {member.mention}!\n\nWe hope to see you again soon!",
             color=discord.Color.red(),
         )
+        embed.set_footer(text=f"{member.name} was here for {left_after}")
 
+        # Send the embed message
         await join_leave_channel.send(embed=embed)
 
 
