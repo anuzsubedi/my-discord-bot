@@ -12,41 +12,23 @@ class Logger(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_ready(self):
-        print("Logger cog is ready.")
-        log_channel = self.bot.get_channel(
-            config["configuration"]["public-log-channel"]
-        )
-        await log_channel.send("Logger cog is ready.")
-
-    @commands.Cog.listener()
-    async def on_message(self, message):
-        if message.author.bot:
-            return
-        log_channel = self.bot.get_channel(
-            config["configuration"]["public-log-channel"]
-        )
-        await log_channel.send(
-            f"Message from {message.author} in {message.channel}: {message.content}"
-        )
-
-    @commands.Cog.listener()
     async def on_member_join(self, member):
-        log_channel = self.bot.get_channel(
-            config["configuration"]["public-log-channel"]
+        join_leave_channel = self.bot.get_channel(
+            config["configuration"]["join-leave-channel"]
         )
-        await log_channel.send("Someone has joined the server.")
 
-    @commands.Cog.listener()
-    async def on_message(self, message):
-        if message.author.bot:
-            return
-        log_channel = self.bot.get_channel(
-            config["configuration"]["public-log-channel"]
+        title = "Member Joined"
+        description = f"Welcome {member.mention} to the server!\n\nPlease familiarize yourself with the rules and enjoy your stay!"
+        joined_at = member.joined_at.strftime("%Y-%m-%d %H:%M")
+        embed = discord.Embed(
+            title=title,
+            description=description,
+            color=discord.Color.green(),
         )
-        await log_channel.send(
-            f"Message from {message.author} in {message.channel}: {message.content}"
-        )
+
+        embed.set_footer(text=f"Joined at: {joined_at}")
+
+        await join_leave_channel.send(embed=embed)
 
 
 async def setup(bot):
