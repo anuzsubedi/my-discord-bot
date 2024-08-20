@@ -1,2 +1,4 @@
 config.yaml
 cogs/__pycache__/
+myconfig.yaml
+.DS_Store

@@ -4,7 +4,7 @@ from discord import app_commands
 import yaml
 
 # Load the configuration from the YAML file
-with open("config.yaml", "r") as file:
+with open("./config.yaml", "r") as file:
     config = yaml.safe_load(file)
 
 
