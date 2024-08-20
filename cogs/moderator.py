@@ -11,15 +11,13 @@ with open("config.yaml", "r") as file:
 class Moderator(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.mod_roles = config["configuration"].get("mod-roles", [])
 
-    def is_moderator(self, user: discord.Member) -> bool:
-        """Checks if the user has a moderator role."""
-        return any(role.id in self.mod_roles for role in user.roles)
-
-    def is_admin(self, user: discord.Member) -> bool:
-        """Checks if the user has administrative permissions."""
-        return user.guild_permissions.administrator
+    def check_mod(self, ctx):
+        mod_roles = config["configuration"]["mod-roles"]
+        for role in ctx.user.roles:
+            if role in mod_roles:
+                return True
+        return False
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -28,22 +26,18 @@ class Moderator(commands.Cog):
     @app_commands.command(
         name="checkmod", description="A command to check moderator permissions."
     )
-    async def checkmod(self, interaction: discord.Interaction):
-        if self.is_admin(interaction.user):
-            await interaction.response.send_message(
-                "You are an admin and are eligible to use moderator commands.",
-                ephemeral=True,
-            )
-        elif self.is_moderator(interaction.user):
-            await interaction.response.send_message(
-                "You are a moderator and are eligible to use moderator commands.",
-                ephemeral=True,
-            )
-        else:
-            await interaction.response.send_message(
-                "You are not a moderator and are not eligible to use moderator commands.",
-                ephemeral=True,
-            )
+    async def checkmod(self, ctx: discord.Interaction):
+        try:
+            mod_roles = config["configuration"]["mod-roles"]
+            if ctx.user.guild_permissions.administrator:
+                await ctx.response.send_message("You are an administrator.")
+            elif self.check_mod(ctx):
+                await ctx.response.send_message("You are a moderator.")
+            else:
+                await ctx.response.send_message("You are not a moderator.")
+        except Exception as e:
+            print(f"\n++++++++++++\n")
+            print(e)
 
 
 # Add the cog to the bot
