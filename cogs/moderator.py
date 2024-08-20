@@ -24,17 +24,20 @@ class Moderator(commands.Cog):
         mod_roles = config["configuration"]["mod-roles"]
         if mod_roles is None:
             await interaction.response.send_message(
-                f"This is a moderator command.\nNo moderator roles are configured."
+                f"This is a moderator command.\nNo moderator roles are configured.",
+                ephemeral=True,
             )
             return
         if (
             any(role in mod_roles for role in interaction.user.roles)
             or interaction.user.guild_permissions.administrator
         ):
-            await interaction.response.send_message("You have moderator permissions.")
+            await interaction.response.send_message(
+                "You have moderator permissions.,ephemeral=True", ephemeral=True
+            )
         else:
             await interaction.response.send_message(
-                "You do not have permission to use this command.",
+                "You do not have permission to use this command.", ephemeral=True
             )
 
 
