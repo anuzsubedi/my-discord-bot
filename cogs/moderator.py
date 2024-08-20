@@ -35,11 +35,19 @@ class Moderator(commands.Cog):
         try:
             mod_roles = config["configuration"]["mod-roles"]
             if ctx.user.guild_permissions.administrator:
-                await ctx.response.send_message("You are an administrator.")
+                await ctx.response.send_message(
+                    "You are eligible to use moderator commands.\nYou are an administrator.",
+                    ephemeral=True,
+                )
             elif self.check_mod(ctx):
-                await ctx.response.send_message("You are a moderator.")
+                await ctx.response.send_message(
+                    "You are eligible to use moderator commands.\nYou are a moderator.",
+                    ephemeral=True,
+                )
             else:
-                await ctx.response.send_message("You are not a moderator.")
+                await ctx.response.send_message(
+                    "You are not allowed to use moderator commands.", ephemeral=True
+                )
         except Exception as e:
             print(f"\n++++++++++++\n")
             print(e)
