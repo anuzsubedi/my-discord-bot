@@ -13,11 +13,16 @@ class Moderator(commands.Cog):
         self.bot = bot
 
     def check_mod(self, ctx):
-        mod_roles = config["configuration"]["mod-roles"]
-        for role in ctx.user.roles:
-            if role in mod_roles:
-                return True
-        return False
+        try:
+            mod_roles = config["configuration"]["mod-roles"]
+            for role in ctx.user.roles:
+                if role.name in mod_roles:  # Use role.name to compare the role's name
+                    return True
+            return False
+
+        except Exception as e:
+            print(f"\n++++++++++++\n")
+            print(e)
 
     @commands.Cog.listener()
     async def on_ready(self):
