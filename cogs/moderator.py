@@ -157,6 +157,34 @@ class Moderator(commands.Cog):
             print(f"\n++++++++++++\n")
             print(e)
 
+    @app_commands.command(
+        name="purgeall", description="Delete up to 1000 messages in the channel."
+    )
+    async def purge_all(self, interaction: discord.Interaction):
+        # Check if the user has the 'Manage Messages' permission
+        if not interaction.user.guild_permissions.manage_messages:
+            await interaction.response.send_message(
+                "You do not have permission to use this command.", ephemeral=True
+            )
+            return
+
+        try:
+            # Acknowledge the interaction immediately
+            await interaction.response.defer(ephemeral=True)
+
+            # Purge up to 1000 messages in the channel
+            deleted = await interaction.channel.purge(limit=1000)
+
+            # Send a follow-up message with the result
+            await interaction.followup.send(
+                f"Successfully deleted {len(deleted)} messages.", ephemeral=True
+            )
+        except discord.Forbidden:
+            await interaction.followup.send(
+                "I do not have permission to delete messages in this channel.",
+                ephemeral=True,
+            )
+
 
 # Add the cog to the bot
 async def setup(bot):
