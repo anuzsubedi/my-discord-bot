@@ -1,3 +1,4 @@
+import asyncio
 import discord
 from discord.ext import commands
 import yaml
@@ -43,7 +44,5 @@ async def main():
     await load_cogs()
     await bot.start(DISCORD_TOKEN)
 
-
-import asyncio
 
 asyncio.run(main())
