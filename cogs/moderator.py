@@ -11,42 +11,32 @@ with open("config.yaml", "r") as file:
 class Moderator(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.mod_roles = config["configuration"].get("mod-roles", [])
 
-    def check_mod(self, interaction: discord.Interaction):
-        # Retrieve the moderator role from the configuration
-        mod_roles = config["configuration"]["mod-roles"]
-        if mod_roles is None:
-            interaction.response.send_message(
-                f"Moderator roles are not configured.\nThis is a mod command."
-            )
-            return False
-        # Ensure the member has the moderator role
-        for role in interaction.user.roles:
-            if role.id in mod_roles:
-                return True
-        return False
+    def is_moderator(self, user: discord.Member) -> bool:
+        """Checks if the user has a moderator role."""
+        return any(role.id in self.mod_roles for role in user.roles)
 
-    def check_admin(self, interaction: discord.Interaction):
-        if interaction.user.guild_permissions.administrator:
-            return True
-        return False
+    def is_admin(self, user: discord.Member) -> bool:
+        """Checks if the user has administrative permissions."""
+        return user.guild_permissions.administrator
 
     @commands.Cog.listener()
     async def on_ready(self):
         print("Moderator Cog is ready")
 
     @app_commands.command(
-        name="checkmod", description="A command to check moderator perms."
+        name="checkmod", description="A command to check moderator permissions."
     )
-    async def testmod(self, interaction: discord.Interaction):
-        if self.check_admin(interaction):
+    async def checkmod(self, interaction: discord.Interaction):
+        if self.is_admin(interaction.user):
             await interaction.response.send_message(
-                "You are an admin and are eligible to use moderator commands",
+                "You are an admin and are eligible to use moderator commands.",
                 ephemeral=True,
             )
-        elif self.check_mod(interaction):
+        elif self.is_moderator(interaction.user):
             await interaction.response.send_message(
-                "You are a moderator and are eligible to use moderator commands",
+                "You are a moderator and are eligible to use moderator commands.",
                 ephemeral=True,
             )
         else:
