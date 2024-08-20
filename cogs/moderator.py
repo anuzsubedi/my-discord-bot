@@ -57,6 +57,7 @@ class Moderator(commands.Cog):
     )
     async def announce(self, ctx: discord.Interaction, message: str):
         try:
+            message = message.replace("\\n", "\n")
             if ctx.user.guild_permissions.administrator or self.check_mod(ctx):
                 announcement_channel = self.bot.get_channel(
                     config["configuration"]["announcement-channel"]
