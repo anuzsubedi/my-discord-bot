@@ -104,6 +104,59 @@ class Moderator(commands.Cog):
             print(f"\n++++++++++++\n")
             print(e)
 
+    @app_commands.command(
+        name="sendbotmessage",
+        description="Send a message as the bot in specified channel.",
+    )
+    async def sendbotmessagae(
+        self, ctx: discord.Interaction, channel: discord.TextChannel, message: str
+    ):
+        try:
+            if ctx.user.guild_permissions.administrator or self.check_mod(ctx):
+                await channel.send(message.replace("\\n", "\n"))
+                await ctx.response.send_message(
+                    f"Message sent to {channel.mention}.",
+                    ephemeral=True,
+                )
+            else:
+                await ctx.response.send_message(
+                    "You are not allowed to use this command.", ephemeral=True
+                )
+        except Exception as e:
+            print(f"\n++++++++++++\n")
+            print(e)
+
+    @app_commands.command(
+        name="sendbotembed",
+        description="Send an embed message as the bot in specified channel.",
+    )
+    async def send_bot_embed(
+        self,
+        ctx: discord.Interaction,
+        channel: discord.TextChannel,
+        title: str,
+        description: str,
+    ):
+        try:
+            if ctx.user.guild_permissions.administrator or self.check_mod(ctx):
+                embed = discord.Embed(
+                    title=title,
+                    description=description.replace("\\n", "\n"),
+                    color=discord.Color.green(),
+                )
+                await channel.send(embed=embed)
+                await ctx.response.send_message(
+                    f"Embed message sent to {channel.mention}.",
+                    ephemeral=True,
+                )
+            else:
+                await ctx.response.send_message(
+                    "You are not allowed to use this command.", ephemeral=True
+                )
+        except Exception as e:
+            print(f"\n++++++++++++\n")
+            print(e)
+
 
 # Add the cog to the bot
 async def setup(bot):
