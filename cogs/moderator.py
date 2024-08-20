@@ -75,6 +75,35 @@ class Moderator(commands.Cog):
             print(f"\n++++++++++++\n")
             print(e)
 
+    @app_commands.command(
+        name="embedannounce", description="Send an announcement as an embed."
+    )
+    async def embedannounce(
+        self, ctx: discord.Interaction, title: str, description: str
+    ):
+        try:
+            if ctx.user.guild_permissions.administrator or self.check_mod(ctx):
+                announcement_channel = self.bot.get_channel(
+                    config["configuration"]["announcement-channel"]
+                )
+                embed = discord.Embed(
+                    title=title,
+                    description=description.replace("\\n", "\n"),
+                    color=discord.Color.green(),
+                )
+                await announcement_channel.send(embed=embed)
+                await ctx.response.send_message(
+                    f"Announcement sent to {announcement_channel.mention}.",
+                    ephemeral=True,
+                )
+            else:
+                await ctx.response.send_message(
+                    "You are not allowed to use this command.", ephemeral=True
+                )
+        except Exception as e:
+            print(f"\n++++++++++++\n")
+            print(e)
+
 
 # Add the cog to the bot
 async def setup(bot):
