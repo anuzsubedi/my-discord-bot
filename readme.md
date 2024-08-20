@@ -10,7 +10,7 @@ To get started with the bot, follow these instructions:
 
 1. Clone the repository to your local machine.
 
-2. In the root folder of the bot, create a `config.yml` file with the following format:
+2. In the root folder of the bot, create a `config.yaml` file with the following format:
 
 ```yaml
 discord:
@@ -39,8 +39,16 @@ configuration:
    - Under the "Token" section, click on "Copy" to copy your bot token.
    - Paste the copied token into the `YOUR_DISCORD_BOT_TOKEN` field in the `config.yml` file.
 
-4. Save the `config.yml` file.
+   To obtain the channel IDs for `YOUR_ANNOUNCEMENT_CHANNEL_ID`, `YOUR_LOG_CHANNEL_ID`, `YOUR_JOIN_LEAVE_CHANNEL_ID`, and `YOUR_MEMBER_DETAIL_LOG_CHANNEL_ID`, you need to enable Developer Mode in Discord. Here's how:
 
-5. Run the bot using your preferred method. Make sure the `config.yml` file is in the root folder of the bot.
+   - Open your Discord client and go to User Settings.
+   - Under the "Appearance" section, scroll down to the "Advanced" section.
+   - Toggle on the "Developer Mode" option.
+   - Once Developer Mode is enabled, you can right-click on any channel and select "Copy ID" to get the channel ID.
+   - Paste the copied channel ID into the respective fields in the `config.yaml` file.
+
+4. Save the `config.yaml` file.
+
+5. Run the bot using your preferred method. Make sure the `config.yaml` file is in the root folder of the bot.
 
 That's it! Your bot should now be up and running.
