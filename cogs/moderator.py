@@ -1,6 +1,11 @@
 import discord
 from discord.ext import commands
 from discord import app_commands
+import yaml
+
+# Load the configuration from the YAML file
+with open("config.yaml", "r") as file:
+    config = yaml.safe_load(file)
 
 
 class Moderator(commands.Cog):
@@ -11,14 +16,25 @@ class Moderator(commands.Cog):
     async def on_ready(self):
         print("Moderator Cog is ready")
 
-    @app_commands.command(name="testmod", description="A test moderator command")
+    @app_commands.command(
+        name="checkmod", description="A command to check moderator perms."
+    )
     async def testmod(self, interaction: discord.Interaction):
-        mod_role = discord.utils.get(interaction.guild.roles, name="Moderator")
-        if mod_role in interaction.user.roles:
-            await interaction.response.send_message("Moderator command is working!")
+
+        mod_roles = config["configuration"]["mod-roles"]
+        if mod_roles is None:
+            await interaction.response.send_message(
+                f"This is a moderator command.\nNo moderator roles are configured."
+            )
+            return
+        if (
+            any(role in mod_roles for role in interaction.user.roles)
+            or interaction.user.guild_permissions.administrator
+        ):
+            await interaction.response.send_message("You have moderator permissions.")
         else:
             await interaction.response.send_message(
-                "You do not have permission to use this command.", ephemeral=True
+                "You do not have permission to use this command.",
             )
 
 
