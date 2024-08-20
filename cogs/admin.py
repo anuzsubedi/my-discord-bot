@@ -16,12 +16,18 @@ class Admin(commands.Cog):
     )
     async def dmrole(self, ctx: discord.Interaction, role: discord.Role, message: str):
         try:
-            members = role.members
-            for member in members:
-                await member.send(message)
-            await ctx.response.send_message(
-                f"Sent message to {len(members)} members.", ephemeral=True
-            )
+            if ctx.user.guild_permissions.administrator:
+                members = role.members
+                for member in members:
+                    await member.send(message)
+                await ctx.response.send_message(
+                    f"Sent message to {len(members)} members.", ephemeral=True
+                )
+            else:
+                await ctx.response.send_message(
+                    "You need administrator permissions to use this command.",
+                    ephemeral=True,
+                )
         except Exception as e:
             print(f"\n++++++++++++\n")
             print(e)
