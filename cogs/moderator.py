@@ -169,11 +169,43 @@ class Moderator(commands.Cog):
             return
 
         try:
-            # Acknowledge the interaction immediately
-            await interaction.response.defer(ephemeral=True)
+            # Acknowledge the interaction with a custom message
+            await interaction.response.defer(ephemeral=True, thinking=True)
+            await interaction.followup.send(
+                "Purging messages, please wait...", ephemeral=True
+            )
 
             # Purge up to 1000 messages in the channel
             deleted = await interaction.channel.purge(limit=1000)
+
+            # Edit the original follow-up message with the result
+            await interaction.followup.edit_message(
+                message_id=interaction.message.id,
+                content=f"Successfully deleted {len(deleted)} messages.",
+            )
+        except discord.Forbidden:
+            await interaction.followup.send(
+                "I do not have permission to delete messages in this channel.",
+                ephemeral=True,
+            )
+
+    @app_commands.command(
+        name="purge", description="Delete a specific number of messages in the channel."
+    )
+    async def purge(self, interaction: discord.Interaction, amount: int):
+        # Check if the user has the 'Manage Messages' permission
+        if not interaction.user.guild_permissions.manage_messages:
+            await interaction.response.send_message(
+                "You do not have permission to use this command.", ephemeral=True
+            )
+            return
+
+        try:
+            # Acknowledge the interaction immediately
+            await interaction.response.defer(ephemeral=True)
+
+            # Purge the specified number of messages in the channel
+            deleted = await interaction.channel.purge(limit=amount)
 
             # Send a follow-up message with the result
             await interaction.followup.send(
