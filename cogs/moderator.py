@@ -169,19 +169,15 @@ class Moderator(commands.Cog):
             return
 
         try:
-            # Acknowledge the interaction with a custom message
-            await interaction.response.defer(ephemeral=True, thinking=True)
-            await interaction.followup.send(
-                "Purging messages, please wait...", ephemeral=True
-            )
+            # Acknowledge the interaction immediately
+            await interaction.response.defer(ephemeral=True)
 
             # Purge up to 1000 messages in the channel
             deleted = await interaction.channel.purge(limit=1000)
 
-            # Edit the original follow-up message with the result
-            await interaction.followup.edit_message(
-                message_id=interaction.message.id,
-                content=f"Successfully deleted {len(deleted)} messages.",
+            # Send a follow-up message with the result
+            await interaction.followup.send(
+                f"Successfully deleted {len(deleted)} messages.", ephemeral=True
             )
         except discord.Forbidden:
             await interaction.followup.send(
