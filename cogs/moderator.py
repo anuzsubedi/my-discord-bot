@@ -52,6 +52,28 @@ class Moderator(commands.Cog):
             print(f"\n++++++++++++\n")
             print(e)
 
+    @app_commands.command(
+        name="announce", description="Send an announcement to the announcement channel."
+    )
+    async def announce(self, ctx: discord.Interaction, message: str):
+        try:
+            if ctx.user.guild_permissions.administrator or self.check_mod(ctx):
+                announcement_channel = self.bot.get_channel(
+                    config["configuration"]["announcement-channel"]
+                )
+                await announcement_channel.send(message)
+                await ctx.response.send_message(
+                    f"Announcement sent to {announcement_channel.mention}.",
+                    ephemeral=True,
+                )
+            else:
+                await ctx.response.send_message(
+                    "You are not allowed to use this command.", ephemeral=True
+                )
+        except Exception as e:
+            print(f"\n++++++++++++\n")
+            print(e)
+
 
 # Add the cog to the bot
 async def setup(bot):
