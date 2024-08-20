@@ -20,7 +20,7 @@ bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 
 # Load the cogs (command sets)
 async def load_cogs():
-    cogs = ["cogs.configure", "cogs.moderator", "cogs.user", "cogs.logger"]
+    cogs = ["cogs.moderator", "cogs.user", "cogs.logger"]
     for cog in cogs:
         await bot.load_extension(cog)
 
