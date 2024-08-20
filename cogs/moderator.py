@@ -12,6 +12,25 @@ class Moderator(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    def check_mod(self, interaction: discord.Interaction):
+        # Retrieve the moderator role from the configuration
+        mod_roles = config["configuration"]["mod-roles"]
+        if mod_roles is None:
+            interaction.response.send_message(
+                f"Moderator roles are not configured.\nThis is a mod command."
+            )
+            return False
+        # Ensure the member has the moderator role
+        for role in interaction.user.roles:
+            if role.id in mod_roles:
+                return True
+        return False
+
+    def check_admin(self, interaction: discord.Interaction):
+        if interaction.user.guild_permissions.administrator:
+            return True
+        return False
+
     @commands.Cog.listener()
     async def on_ready(self):
         print("Moderator Cog is ready")
@@ -20,24 +39,20 @@ class Moderator(commands.Cog):
         name="checkmod", description="A command to check moderator perms."
     )
     async def testmod(self, interaction: discord.Interaction):
-
-        mod_roles = config["configuration"]["mod-roles"]
-        if mod_roles is None:
+        if self.check_admin(interaction):
             await interaction.response.send_message(
-                f"This is a moderator command.\nNo moderator roles are configured.",
+                "You are an admin and are eligible to use moderator commands",
                 ephemeral=True,
             )
-            return
-        if (
-            any(role in mod_roles for role in interaction.user.roles)
-            or interaction.user.guild_permissions.administrator
-        ):
+        elif self.check_mod(interaction):
             await interaction.response.send_message(
-                "You have moderator permissions.,ephemeral=True", ephemeral=True
+                "You are a moderator and are eligible to use moderator commands",
+                ephemeral=True,
             )
         else:
             await interaction.response.send_message(
-                "You do not have permission to use this command.", ephemeral=True
+                "You are not a moderator and are not eligible to use moderator commands.",
+                ephemeral=True,
             )
 
 
