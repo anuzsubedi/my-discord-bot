@@ -221,8 +221,10 @@ class Moderator(commands.Cog):
     ):
         try:
             sentMessage = await channel.send(message)
+            await sentMessage.add_reaction("🔔")
             await ctx.response.send_message(
                 f"Messaage sent to {channel.mention}. Message ID: {sentMessage.id}",
+                ephemeral=True,
             )
         except Exception as e:
             print(f"\n++++++++++++\n")
