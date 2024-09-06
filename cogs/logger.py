@@ -144,17 +144,24 @@ class Logger(commands.Cog):
             print(f"An error occurred: {e}")
 
     @commands.Cog.listener()
-    async def on_reaction_add(self, reaction, user):
-        log_channel_id = config["configuration"]["reaction-log-channel"]
-        log_channel = self.bot.get_channel(log_channel_id)
-        if log_channel is None:
-            return
-        messageId = reaction.message.id
-        checkId = 1281464562108989552
-        if messageId == checkId:
-            await log_channel.send(
-                f"{user.mention} reacted to the message with {reaction.emoji}"
+    async def on_raw_reaction_add(self, payload):
+        try:
+            log_channel = self.bot.get_channel(
+                config["configuration"]["reaction-log-channel"]
             )
+            if log_channel is None:
+                print("Reaction log channel not found.")
+                return
+
+            message = await self.bot.get_channel(payload.channel_id).fetch_message(
+                payload.message_id
+            )
+            await log_channel.send(
+                f"Reaction {payload.emoji} added to message {message.jump_url}"
+            )
+
+        except Exception as e:
+            print(f"An error occurred: {e}")
 
 
 async def setup(bot):
