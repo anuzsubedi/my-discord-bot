@@ -14,6 +14,7 @@ PREFIX = config["discord"]["prefix"]
 # Initialize the bot with intents and command prefix
 intents = discord.Intents.default()
 intents.message_content = True
+intents.reactions = True
 intents.members = True
 
 bot = commands.Bot(command_prefix=PREFIX, intents=intents)
