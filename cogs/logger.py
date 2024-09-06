@@ -180,6 +180,43 @@ class Logger(commands.Cog):
         except Exception as e:
             print(f"An error occurred: {e}")
 
+    @commands.Cog.listener()
+    async def on_raw_reaction_remove(self, payload):
+        try:
+            required_message_id = 1281471405887721545  # will get the message id from mySQL database later on
+            role_id = (
+                1281476972966576202  # will get the role id from mySQL database later on
+            )
+
+            log_channel = self.bot.get_channel(
+                config["configuration"]["reaction-log-channel"]
+            )
+            if log_channel is None:
+                print("Reaction log channel not found.")
+                return
+
+            if required_message_id is None:
+                print("Required message ID not found.")
+                return
+
+            message = await self.bot.get_channel(payload.channel_id).fetch_message(
+                payload.message_id
+            )
+
+            member = message.guild.get_member(payload.user_id)
+            if member is None:
+                print("Member not found.")
+                return
+
+            if payload.message_id == required_message_id:
+                await log_channel.send(
+                    f"Reaction removed from specific message {message.jump_url}"
+                )
+                await member.remove_roles(message.guild.get_role(role_id))
+
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
 
 async def setup(bot):
     await bot.add_cog(Logger(bot))
