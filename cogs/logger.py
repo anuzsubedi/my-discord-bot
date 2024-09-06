@@ -156,9 +156,15 @@ class Logger(commands.Cog):
             message = await self.bot.get_channel(payload.channel_id).fetch_message(
                 payload.message_id
             )
+            required_message_id = 1281471405887721545  # will get the message id from mySQL database later on
             await log_channel.send(
                 f"Reaction {payload.emoji} added to message {message.jump_url}"
             )
+
+            if payload.message_id == required_message_id:
+                await log_channel.send(
+                    f"Reaction added to specific message {message.jump_url}"
+                )
 
         except Exception as e:
             print(f"An error occurred: {e}")
