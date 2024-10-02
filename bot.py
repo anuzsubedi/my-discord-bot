@@ -9,7 +9,7 @@ with open("./config.yaml", "r") as file:
     config = yaml.safe_load(file)
 
 db_manager = db.DatabaseManager()
-db_manager.connect_to_mysql()
+db_manager.check_migration()
 
 # Access specific settings
 DISCORD_TOKEN = config["discord"]["token"]
