@@ -3,25 +3,14 @@ import discord
 from discord.ext import commands
 import yaml
 import mysql.connector
+import utils.dbmanager as db
 
 # Load the configuration from the YAML file
 with open("./config.yaml", "r") as file:
     config = yaml.safe_load(file)
 
-# MySql connection
-try:
-    db = mysql.connector.connect(
-        host=config["mysql"]["host"],
-        user=config["mysql"]["user"],
-        password=config["mysql"]["password"],
-        database=config["mysql"]["database"],
-    )
-    # Access the cursor
-    cursor = db.cursor()
-    print("Connected to MySQL database successfully!")
-except mysql.connector.Error as error:
-    print("Error connecting to MySQL database:", error)
-
+db_manager = db.DatabaseManager()
+db_manager.connect_to_mysql()
 
 # Access specific settings
 DISCORD_TOKEN = config["discord"]["token"]
@@ -38,7 +27,12 @@ bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 
 # Load the cogs (command sets)
 async def load_cogs():
-    cogs = ["cogs.moderator", "cogs.user", "cogs.logger", "cogs.admin"]
+    cogs = [
+        "cogs.moderator",
+        "cogs.user",
+        "cogs.logger",
+        "cogs.admin",
+    ]
     for cog in cogs:
         await bot.load_extension(cog)
 
