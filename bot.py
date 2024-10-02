@@ -2,10 +2,26 @@ import asyncio
 import discord
 from discord.ext import commands
 import yaml
+import mysql.connector
 
 # Load the configuration from the YAML file
 with open("./config.yaml", "r") as file:
     config = yaml.safe_load(file)
+
+# MySql connection
+try:
+    db = mysql.connector.connect(
+        host=config["mysql"]["host"],
+        user=config["mysql"]["user"],
+        password=config["mysql"]["password"],
+        database=config["mysql"]["database"],
+    )
+    # Access the cursor
+    cursor = db.cursor()
+    print("Connected to MySQL database successfully!")
+except mysql.connector.Error as error:
+    print("Error connecting to MySQL database:", error)
+
 
 # Access specific settings
 DISCORD_TOKEN = config["discord"]["token"]
