@@ -29,21 +29,27 @@ class DatabaseManager:
     def check_migration(self):
         self.connect_to_mysql()
         self.check_required_tables()
+        self.close_connection()
 
     def check_required_tables(self):
         self.cursor.execute("SHOW TABLES")
-        tables = {table[0] for table in self.cursor.fetchall()}
+        existing_tables = {table[0] for table in self.cursor.fetchall()}
+        tables_to_create = {
+            "serverlist": self.create_serverlist_table,
+            "channels": self.create_channels_table,
+        }
 
-        if "serverlist" not in tables:
-            self.create_serverlist_table()
-            print("Serverlist table created successfully!")
+        for table_name, create_method in tables_to_create.items():
+            if table_name not in existing_tables:
+                create_method()
+                print(f"{table_name.capitalize()} table created successfully!")
 
-        if "channels" not in tables:
-            self.create_channels_table()
-            print("Channels table created successfully!")
+    def create_table(self, create_query):
+        self.cursor.execute(create_query)
+        self.db.commit()
 
     def create_serverlist_table(self):
-        create_table_query = """
+        create_query = """
         CREATE TABLE serverlist (
             JoinID INTEGER PRIMARY KEY AUTO_INCREMENT,
             GuildID BIGINT NOT NULL UNIQUE,
@@ -51,11 +57,10 @@ class DatabaseManager:
             RecentConnectedDate DATETIME NOT NULL
         );
         """
-        self.cursor.execute(create_table_query)
-        self.db.commit()
+        self.create_table(create_query)
 
     def create_channels_table(self):
-        create_table_query = """
+        create_query = """
         CREATE TABLE channels (
             GuildID BIGINT PRIMARY KEY,
             AdminRoleID BIGINT NOT NULL,
@@ -67,8 +72,7 @@ class DatabaseManager:
             FOREIGN KEY (GuildID) REFERENCES serverlist (GuildID)
         );
         """
-        self.cursor.execute(create_table_query)
-        self.db.commit()
+        self.create_table(create_query)
 
     def close_connection(self):
         if self.cursor:
