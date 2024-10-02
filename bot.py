@@ -2,7 +2,6 @@ import asyncio
 import discord
 from discord.ext import commands
 import yaml
-import mysql.connector
 import utils.dbmanager as db
 
 # Load the configuration from the YAML file
