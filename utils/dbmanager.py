@@ -114,3 +114,15 @@ class DatabaseManager:
         self.cursor.execute(insert_query, (guild_id, channel_id, channel_id))
         self.db.commit()
         self.close_connection()
+
+    def get_announcement_channel(self, guild_id):
+        print("hello")
+        print(guild_id)
+        self.connect_to_mysql()
+        self.cursor.execute(
+            "SELECT AnnouncementChannelID FROM channels WHERE GuildID = %s", (guild_id,)
+        )
+        result = self.cursor.fetchone()
+        print(result)
+        self.close_connection()
+        return result[0] if result else None
