@@ -31,6 +31,7 @@ async def load_cogs():
         "cogs.user",
         "cogs.logger",
         "cogs.admin",
+        "cogs.configuration",
     ]
     for cog in cogs:
         await bot.load_extension(cog)
