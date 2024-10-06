@@ -7,6 +7,7 @@ from discord import app_commands
 class Configuration(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.db_manager = db()
 
     @app_commands.command(
         name="set_announcement_channel", description="Set the announcement channel."
@@ -15,6 +16,7 @@ class Configuration(commands.Cog):
         self, interaction: discord.Interaction, channel: discord.TextChannel
     ):
         try:
+            self.db_manager.set_announcement_channel(interaction.guild.id, channel.id)
             await interaction.response.send_message(
                 f"Announcement channel set to {channel.mention}.", ephemeral=True
             )
