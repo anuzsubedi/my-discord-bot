@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 import yaml
+import utils.dbmanager as db
 
 # Load the configuration from the YAML file
 with open("./config.yaml", "r") as file:
@@ -11,6 +12,7 @@ with open("./config.yaml", "r") as file:
 class Moderator(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.db_manager = db.DatabaseManager()
 
     def check_mod(self, ctx):
         try:
@@ -58,10 +60,30 @@ class Moderator(commands.Cog):
     async def announce(self, ctx: discord.Interaction, message: str):
         try:
             message = message.replace("\\n", "\n")
+
             if ctx.user.guild_permissions.administrator or self.check_mod(ctx):
-                announcement_channel = self.bot.get_channel(
-                    config["configuration"]["announcement-channel"]
+                # Fetch the announcement channel ID from the database
+                announcement_channel_id = self.db_manager.get_announcement_channel(
+                    ctx.guild.id
                 )
+
+                if not announcement_channel_id:
+                    await ctx.response.send_message(
+                        "Announcement channel not found in the database.",
+                        ephemeral=True,
+                    )
+                    return
+
+                # Fetch the announcement channel using the ID retrieved from the database
+                announcement_channel = self.bot.get_channel(announcement_channel_id)
+
+                if not announcement_channel:
+                    await ctx.response.send_message(
+                        "Announcement channel not found in the guild.", ephemeral=True
+                    )
+                    return
+
+                # Send the announcement
                 await announcement_channel.send(message)
                 await ctx.response.send_message(
                     f"Announcement sent to {announcement_channel.mention}.",
@@ -71,9 +93,9 @@ class Moderator(commands.Cog):
                 await ctx.response.send_message(
                     "You are not allowed to use this command.", ephemeral=True
                 )
+
         except Exception as e:
-            print(f"\n++++++++++++\n")
-            print(e)
+            print(f"\n++++++++++++\nError: {e}")
 
     @app_commands.command(
         name="embedannounce", description="Send an announcement as an embed."
