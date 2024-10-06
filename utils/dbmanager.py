@@ -72,7 +72,7 @@ class DatabaseManager:
             ModeratorRoleID BIGINT,
             ChangeLogChannelID BIGINT,
             AnnouncementChannelID BIGINT,
-            LeaveJoinChannelID BIGINTL,
+            LeaveJoinChannelID BIGINT,
             AdvancedLeaveJoinChannelID BIGINT,
             FOREIGN KEY (GuildID) REFERENCES serverlist (GuildID)
         );
