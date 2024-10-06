@@ -68,12 +68,12 @@ class DatabaseManager:
         create_query = """
         CREATE TABLE channels (
             GuildID BIGINT PRIMARY KEY,
-            AdminRoleID BIGINT NOT NULL,
-            ModeratorRoleID BIGINT NOT NULL,
-            ChangeLogChannelID BIGINT NOT NULL,
-            AnnouncementChannelID BIGINT NOT NULL,
-            LeaveJoinChannelID BIGINT NOT NULL,
-            AdvancedLeaveJoinChannelID BIGINT NOT NULL,
+            AdminRoleID BIGINT,
+            ModeratorRoleID BIGINT,
+            ChangeLogChannelID BIGINT,
+            AnnouncementChannelID BIGINT,
+            LeaveJoinChannelID BIGINTL,
+            AdvancedLeaveJoinChannelID BIGINT,
             FOREIGN KEY (GuildID) REFERENCES serverlist (GuildID)
         );
         """
@@ -101,5 +101,16 @@ class DatabaseManager:
             VALUES (%s, NOW(), NOW())
             """
             self.cursor.execute(insert_query, (guild_id,))
+        self.db.commit()
+        self.close_connection()
+
+    def set_announcement_channel(self, guild_id, channel_id):
+        self.connect_to_mysql()
+        insert_query = """
+        INSERT INTO channels (GuildID, AnnouncementChannelID)
+        VALUES (%s, %s)
+        ON DUPLICATE KEY UPDATE AnnouncementChannelID = %s
+        """
+        self.cursor.execute(insert_query, (guild_id, channel_id, channel_id))
         self.db.commit()
         self.close_connection()
