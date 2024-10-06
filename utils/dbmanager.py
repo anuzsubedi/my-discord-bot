@@ -26,6 +26,13 @@ class DatabaseManager:
         except mysql.connector.Error as error:
             print("Error connecting to MySQL database:", error)
 
+    def close_connection(self):
+        if self.cursor:
+            self.cursor.close()
+        if self.db:
+            self.db.close()
+            print("Database connection closed.")
+
     def check_migration(self):
         self.connect_to_mysql()
         self.check_required_tables()
@@ -34,12 +41,10 @@ class DatabaseManager:
     def check_required_tables(self):
         self.cursor.execute("SHOW TABLES")
         existing_tables = {table[0] for table in self.cursor.fetchall()}
-        tables_to_create = {
+        for table_name, create_method in {
             "serverlist": self.create_serverlist_table,
             "channels": self.create_channels_table,
-        }
-
-        for table_name, create_method in tables_to_create.items():
+        }.items():
             if table_name not in existing_tables:
                 create_method()
                 print(f"{table_name.capitalize()} table created successfully!")
@@ -74,9 +79,27 @@ class DatabaseManager:
         """
         self.create_table(create_query)
 
-    def close_connection(self):
-        if self.cursor:
-            self.cursor.close()
-        if self.db:
-            self.db.close()
-        print("Database connection closed.")
+    def check_server(self, guild_id):
+        self.cursor.execute(
+            "SELECT GuildID FROM serverlist WHERE GuildID = %s", (guild_id,)
+        )
+        result = self.cursor.fetchone()
+        return result is not None
+
+    def insert_server(self, guild_id):
+        self.connect_to_mysql()
+        if self.check_server(guild_id):
+            insert_query = """
+            UPDATE serverlist 
+            SET RecentConnectedDate = NOW()
+            WHERE GuildID = %s
+            """
+            self.cursor.execute(insert_query, (guild_id,))
+        else:
+            insert_query = """
+            INSERT INTO serverlist (GuildID, FirstConnectedDate, RecentConnectedDate)
+            VALUES (%s, NOW(), NOW())
+            """
+            self.cursor.execute(insert_query, (guild_id,))
+        self.db.commit()
+        self.close_connection()
