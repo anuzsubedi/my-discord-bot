@@ -235,23 +235,7 @@ class Moderator(commands.Cog):
                 ephemeral=True,
             )
 
-    @app_commands.command(
-        name="testcommand", description="A command to test logging of messaageID"
-    )
-    async def test_command(
-        self, ctx: discord.Interaction, message: str, channel: discord.TextChannel
-    ):
-        try:
-            sentMessage = await channel.send(message)
-            await sentMessage.add_reaction("🔔")
-            await ctx.response.send_message(
-                f"Messaage sent to {channel.mention}. Message ID: {sentMessage.id}",
-                ephemeral=True,
-            )
-        except Exception as e:
-            print(f"\n++++++++++++\n")
-            print(e)
-
+   
 
 # Add the cog to the bot
 async def setup(bot):
