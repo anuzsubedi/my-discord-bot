@@ -61,6 +61,7 @@ class DatabaseManager:
             required_tables = {
                 "serverlist": self.create_serverlist_table,
                 "channels": self.create_channels_table,
+                "modroles": self.create_mod_roles_table  # New table for storing mod roles
             }
             for table_name, create_method in required_tables.items():
                 if table_name not in existing_tables:
@@ -106,6 +107,18 @@ class DatabaseManager:
         """
         self.create_table(create_query)
 
+    def create_mod_roles_table(self):
+        """Create the 'modroles' table."""
+        create_query = """
+        CREATE TABLE modroles (
+            GuildID BIGINT NOT NULL,
+            RoleName VARCHAR(100) NOT NULL,
+            PRIMARY KEY (GuildID, RoleName),
+            FOREIGN KEY (GuildID) REFERENCES serverlist (GuildID)
+        );
+        """
+        self.create_table(create_query)
+
     def check_server(self, guild_id):
         """Check if a server exists in the 'serverlist' table."""
         try:
@@ -138,6 +151,39 @@ class DatabaseManager:
                 print(f"Error inserting/updating server: {error}")
         self.close_connection()
 
+    def set_mod_roles(self, guild_id, role_names):
+        """Set the moderator roles for a server."""
+        self.connect_to_mysql()
+        if self.db and self.cursor:
+            try:
+                # Delete existing mod roles for this guild
+                delete_query = "DELETE FROM modroles WHERE GuildID = %s"
+                self.cursor.execute(delete_query, (guild_id,))
+                
+                # Insert new mod roles
+                insert_query = "INSERT INTO modroles (GuildID, RoleName) VALUES (%s, %s)"
+                for role_name in role_names:
+                    self.cursor.execute(insert_query, (guild_id, role_name))
+                self.db.commit()
+            except mysql.connector.Error as error:
+                print(f"Error setting mod roles: {error}")
+        self.close_connection()
+
+    def get_mod_roles(self, guild_id):
+        """Retrieve the moderator roles for a server."""
+        self.connect_to_mysql()
+        if self.db and self.cursor:
+            try:
+                query = "SELECT RoleName FROM modroles WHERE GuildID = %s"
+                self.cursor.execute(query, (guild_id,))
+                result = self.cursor.fetchall()
+                return [row[0] for row in result] if result else None
+            except mysql.connector.Error as error:
+                print(f"Error retrieving mod roles: {error}")
+        self.close_connection()
+        return None
+
+    # Channel-related methods (existing code)
     def set_announcement_channel(self, guild_id, channel_id):
         """Set or update the announcement channel for a server."""
         self._set_channel(guild_id, channel_id, 'AnnouncementChannelID')
