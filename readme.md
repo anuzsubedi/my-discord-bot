@@ -2,6 +2,8 @@
 
 I initially created this bot for personal use, but I decided to open-source it to benefit others as well. Over time, the bot has evolved to support multiple servers and use a MySQL database for configuration, making it more scalable and flexible.
 
+For the list of available commands, please refer to the [commands.md](commands.md).
+
 ## Key Changes Since v1.0.0-alpha
 
 The previous version (v1.0.0-alpha), available [here](https://github.com/anuzsubedi/my-discord-bot/releases/tag/v1.0.0-alpha), used a `config.yaml` file to configure various features like announcement channels, mod-roles, and logging. That version was focused on a single server configuration.
