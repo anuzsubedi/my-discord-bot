@@ -10,19 +10,23 @@ class Moderator(commands.Cog):
         self.db_manager = db.DatabaseManager()
 
     async def check_mod(self, interaction):
-        """Check if the user has a moderator role."""
+        """Check if the user has a moderator role based on role IDs."""
         try:
-            # Fetch moderator roles from the database
-            mod_roles = self.db_manager.get_mod_roles(interaction.guild.id)
-            if not mod_roles:
+            # Fetch moderator role IDs from the database
+            mod_role_ids = self.db_manager.get_mod_roles(interaction.guild.id)  # Example: [('<@&1274098935702622310>',)]
+            
+            if not mod_role_ids:
                 await interaction.response.send_message(
                     "Moderator roles are not configured properly in the database.",
                     ephemeral=True,
                 )
                 return False
 
-            # Check if the user has any of the moderator roles
-            if any(role.name in mod_roles for role in interaction.user.roles):
+            # Clean and extract role IDs from the fetched data
+            mod_role_ids_cleaned = [int(role[0][3:-1]) for role in mod_role_ids]  # Extract the numerical role ID
+
+            # Check if the user has any of the moderator roles by comparing role IDs
+            if any(role.id in mod_role_ids_cleaned for role in interaction.user.roles):
                 return True
             else:
                 await interaction.response.send_message(
@@ -37,6 +41,7 @@ class Moderator(commands.Cog):
                 "An error occurred while checking moderator roles.", ephemeral=True
             )
             return False
+
 
     @commands.Cog.listener()
     async def on_ready(self):
