@@ -123,44 +123,6 @@ class Logger(commands.Cog):
         minutes = remainder // 60
         return f"{days} days, {hours} hours, {minutes} minutes."
 
-    @commands.Cog.listener()
-    async def on_raw_reaction_add(self, payload):
-        await self.handle_reaction(payload, added=True)
-
-    @commands.Cog.listener()
-    async def on_raw_reaction_remove(self, payload):
-        await self.handle_reaction(payload, added=False)
-
-    async def handle_reaction(self, payload, added):
-        """Handle reactions being added or removed."""
-        try:
-            required_message_id = 1281471405887721545  # Placeholder for message ID
-            role_id = 1281476972966576202  # Placeholder for role ID
-            log_channel_id = self.db_manager.get_log_channel(payload.guild_id)
-            log_channel = self.bot.get_channel(log_channel_id)
-
-            if log_channel is None:
-                print("Reaction log channel not found.")
-                return
-
-            message = await self.bot.get_channel(payload.channel_id).fetch_message(payload.message_id)
-            member = message.guild.get_member(payload.user_id)
-
-            if member is None or payload.message_id != required_message_id:
-                return
-
-            action = "added" if added else "removed"
-            await log_channel.send(f"Reaction {action} to specific message {message.jump_url}")
-
-            role = message.guild.get_role(role_id)
-            if added:
-                await member.add_roles(role)
-            else:
-                await member.remove_roles(role)
-
-        except Exception as e:
-            print(f"An error occurred while handling reaction: {e}")
-
 
 async def setup(bot):
     await bot.add_cog(Logger(bot))
