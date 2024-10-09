@@ -1,54 +1,103 @@
+Here's the draft for your updated `README.md` file based on your latest changes:
+
+---
+
 # My Discord Bot
 
-I initially created this bot for my personal use, but I have decided to open source it for others to benefit from as well.
+I initially created this bot for personal use, but I decided to open-source it to benefit others as well. Over time, the bot has evolved to support multiple servers and use a MySQL database for configuration, making it more scalable and flexible.
 
-Please note that there are more planned features still in progress, so stay tuned for updates!
+## Key Changes Since v1.0.0-alpha
+
+The previous version (v1.0.0-alpha), available [here](https://github.com/anuzsubedi/my-discord-bot/releases/tag/v1.0.0-alpha), used a `config.yaml` file to configure various features like announcement channels, mod-roles, and logging. That version was focused on a single server configuration.
+
+However, since then, the bot has evolved, and all recent commits are aimed at making the bot **multi-server friendly**. The bot now supports multiple servers using a **MySQL database** to store configurations like roles, channels, and logs for each server, rather than relying on a single YAML file.
+
+## Updated Configuration
+
+The `config.yaml` file has been simplified to only require essential information for the bot to run and connect to the database:
+
+```yaml
+discord:
+  token: "YOUR_DISCORD_BOT_TOKEN"
+  prefix: "!"  # Prefix for text-based commands (if needed)
+
+# Database configuration for MySQL
+mysql:
+  host: "YOUR_MYSQL_HOST"
+  user: "YOUR_MYSQL_USER"
+  password: "YOUR_MYSQL_PASSWORD"
+  database: "YOUR_MYSQL_DATABASE"
+  port: 3306  # Default MySQL port, can be changed if needed
+```
+
+### What’s New?
+- **Multi-Server Support**: The bot can now manage configurations for multiple servers (e.g., announcement channels, mod-roles, etc.) using the MySQL database.
+- **MySQL Database**: All configurations (mod-roles, announcement channels, log channels) are stored in a database rather than in the `config.yaml` file.
+  
+### Previous Configuration File (`v1.0.0-alpha`)
+In version [v1.0.0-alpha](https://github.com/anuzsubedi/my-discord-bot/releases/tag/v1.0.0-alpha), the `config.yaml` looked like this:
+
+```yaml
+discord:
+  token: "YOUR_DISCORD_BOT_TOKEN"
+  prefix: "!"
+
+configuration:
+  mod-roles:
+    - Moderator
+    - Admin
+  announcement-channel: YOUR_ANNOUNCEMENT_CHANNEL_ID
+  log-channel: YOUR_LOG_CHANNEL_ID
+  join-leave-channel: YOUR_JOIN_LEAVE_CHANNEL_ID
+  member-detail-log-channel: YOUR_MEMBER_DETAIL_LOG_CHANNEL_ID
+```
+
+In contrast, all such configurations are now managed through the MySQL database, and only basic bot setup is required in the `config.yaml` file.
 
 ## Getting Started
 
 To get started with the bot, follow these instructions:
 
-1. Clone the repository to your local machine.
+### 1. Clone the Repository
+```bash
+git clone https://github.com/anuzsubedi/my-discord-bot.git
+```
 
-2. In the root folder of the bot, create a `config.yaml` file with the following format:
+### 2. Install Dependencies
+Navigate to the bot’s directory and install the required dependencies:
+```bash
+pip install -r requirements.txt
+```
 
+### 3. Create `config.yaml`
+In the root folder of the bot, create a `config.yaml` file with the following format:
 ```yaml
 discord:
   token: "YOUR_DISCORD_BOT_TOKEN"
-  prefix: "!" # Prefix for text-based commands (if you still want to use them)
+  prefix: "!"  # Prefix for text-based commands
 
-configuration:
-  mod-roles:
-    - Moderator
-    - Moderators
-    # Roles that can use moderation commands
-  announcement-channel: YOUR_ANNOUNCEMENT_CHANNEL_ID # Channel id of channel to send announcements
-  log-channel: YOUR_LOG_CHANNEL_ID # Channel to log moderation actions
-  join-leave-channel: YOUR_JOIN_LEAVE_CHANNEL_ID # Channel to log member leave-join events.
-  member-detail-log-channel: YOUR_MEMBER_DETAIL_LOG_CHANNEL_ID # Channel to log member details (more details on members who just joined)
+mysql:
+  host: "YOUR_MYSQL_HOST"
+  user: "YOUR_MYSQL_USER"
+  password: "YOUR_MYSQL_PASSWORD"
+  database: "YOUR_MYSQL_DATABASE"
+  port: 3306  # Default MySQL port
 ```
 
-3. Replace `YOUR_DISCORD_BOT_TOKEN`, `YOUR_ANNOUNCEMENT_CHANNEL_ID`, `YOUR_LOG_CHANNEL_ID`, `YOUR_JOIN_LEAVE_CHANNEL_ID`, and `YOUR_MEMBER_DETAIL_LOG_CHANNEL_ID` with the appropriate values. Make sure to keep the quotes around the token.
+### 4. Configure MySQL Database
+Make sure your MySQL database is running and properly. The required tables are created automatically when the bot starts.
 
-   To obtain a Discord bot token, follow these steps:
+### 5. Run the Bot
+```bash
+python bot.py
+```
 
-   - Go to the [Discord Developer Portal](https://discord.com/developers/applications).
-   - Create a new application.
-   - Navigate to the "Bot" tab.
-   - Click on "Add Bot" to create a bot for your application.
-   - Under the "Token" section, click on "Copy" to copy your bot token.
-   - Paste the copied token into the `YOUR_DISCORD_BOT_TOKEN` field in the `config.yml` file.
+Ensure the `config.yaml` file is present in the root directory, and the bot will automatically connect to Discord and the MySQL database.
 
-   To obtain the channel IDs for `YOUR_ANNOUNCEMENT_CHANNEL_ID`, `YOUR_LOG_CHANNEL_ID`, `YOUR_JOIN_LEAVE_CHANNEL_ID`, and `YOUR_MEMBER_DETAIL_LOG_CHANNEL_ID`, you need to enable Developer Mode in Discord. Here's how:
+## Contributing
 
-   - Open your Discord client and go to User Settings.
-   - Under the "Appearance" section, scroll down to the "Advanced" section.
-   - Toggle on the "Developer Mode" option.
-   - Once Developer Mode is enabled, you can right-click on any channel and select "Copy ID" to get the channel ID.
-   - Paste the copied channel ID into the respective fields in the `config.yaml` file.
+Feel free to open issues or submit pull requests if you would like to contribute to the bot's development. All feedback and suggestions are welcome!
 
-4. Save the `config.yaml` file.
+---
 
-5. Run the bot using your preferred method. Make sure the `config.yaml` file is in the root folder of the bot.
-
-That's it! Your bot should now be up and running.
+Let me know if you need any changes or additions!
