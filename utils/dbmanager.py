@@ -177,11 +177,16 @@ class DatabaseManager:
                 query = "SELECT RoleID FROM modroles WHERE GuildID = %s"
                 self.cursor.execute(query, (guild_id,))
                 result = self.cursor.fetchall()
-                return [int(row[0]) for row in result] if result else None  # Return list of role IDs as integers
+                print(result)
+                print([row[0] for row in result] if result else None)
+                # Extract role IDs as integers directly
+                return [row[0] for row in result] if result else None  # Ensure we extract the role ID from each row
+
             except mysql.connector.Error as error:
                 print(f"Error retrieving mod roles: {error}")
         self.close_connection()
         return None
+
 
     # Channel-related methods (existing code)
     def set_announcement_channel(self, guild_id, channel_id):
