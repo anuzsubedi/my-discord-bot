@@ -1,7 +1,6 @@
 import datetime
 import discord
 from discord.ext import commands
-import yaml
 import pytz
 from utils.dbmanager import DatabaseManager
 
@@ -10,19 +9,6 @@ class Logger(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.db_manager = DatabaseManager()  # Instantiate DatabaseManager
-        self.config = self.load_config()
-
-    def load_config(self, config_path="./config.yaml"):
-        """Load bot configuration from YAML file."""
-        try:
-            with open(config_path, "r") as file:
-                return yaml.safe_load(file)
-        except FileNotFoundError:
-            print(f"Config file {config_path} not found.")
-            return None
-        except yaml.YAMLError as e:
-            print(f"Error parsing config file: {e}")
-            return None
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
@@ -36,7 +22,7 @@ class Logger(commands.Cog):
     async def on_member_join(self, member):
         """Triggered when a new member joins the guild."""
         try:
-            join_leave_channel, member_details_channel = self.get_channels()
+            join_leave_channel, member_details_channel = await self.get_channels(member.guild.id)
 
             if not join_leave_channel or not member_details_channel:
                 return
@@ -47,12 +33,19 @@ class Logger(commands.Cog):
         except Exception as e:
             print(f"An error occurred while processing member join: {e}")
 
-    def get_channels(self):
-        """Retrieve the channels for join/leave and member details."""
-        return (
-            self.bot.get_channel(self.config["configuration"]["join-leave-channel"]),
-            self.bot.get_channel(self.config["configuration"]["member-detail-log-channel"]),
-        )
+    async def get_channels(self, guild_id):
+        """Retrieve the join-leave and member details channels from the database."""
+        try:
+            join_leave_channel_id = self.db_manager.get_join_leave_channel(guild_id)
+            member_details_channel_id = self.db_manager.get_member_detail_channel(guild_id)
+
+            join_leave_channel = self.bot.get_channel(join_leave_channel_id) if join_leave_channel_id else None
+            member_details_channel = self.bot.get_channel(member_details_channel_id) if member_details_channel_id else None
+
+            return join_leave_channel, member_details_channel
+        except Exception as e:
+            print(f"An error occurred while retrieving channels: {e}")
+            return None, None
 
     def calculate_account_age(self, member):
         """Calculate account age and check if the user is new."""
@@ -106,7 +99,7 @@ class Logger(commands.Cog):
     async def on_member_remove(self, member):
         """Triggered when a member leaves the guild."""
         try:
-            join_leave_channel = self.bot.get_channel(self.config["configuration"]["join-leave-channel"])
+            join_leave_channel, _ = await self.get_channels(member.guild.id)
             if not join_leave_channel or not member.joined_at:
                 return
 
@@ -143,7 +136,8 @@ class Logger(commands.Cog):
         try:
             required_message_id = 1281471405887721545  # Placeholder for message ID
             role_id = 1281476972966576202  # Placeholder for role ID
-            log_channel = self.bot.get_channel(self.config["configuration"]["reaction-log-channel"])
+            log_channel_id = self.db_manager.get_log_channel(payload.guild_id)
+            log_channel = self.bot.get_channel(log_channel_id)
 
             if log_channel is None:
                 print("Reaction log channel not found.")
