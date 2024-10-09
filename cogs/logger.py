@@ -49,13 +49,10 @@ class Logger(commands.Cog):
 
     def get_channels(self):
         """Retrieve the channels for join/leave and member details."""
-        join_leave_channel = self.bot.get_channel(
-            self.config["configuration"]["join-leave-channel"]
+        return (
+            self.bot.get_channel(self.config["configuration"]["join-leave-channel"]),
+            self.bot.get_channel(self.config["configuration"]["member-detail-log-channel"]),
         )
-        member_details_channel = self.bot.get_channel(
-            self.config["configuration"]["member-detail-log-channel"]
-        )
-        return join_leave_channel, member_details_channel
 
     def calculate_account_age(self, member):
         """Calculate account age and check if the user is new."""
@@ -74,7 +71,7 @@ class Logger(commands.Cog):
             account_age = "1 day."
         else:
             account_age = f"{(now - account_creation).seconds // 3600} hours."
-        
+
         return account_age, is_new_user
 
     async def send_welcome_message(self, member, join_leave_channel, account_age):
@@ -82,7 +79,7 @@ class Logger(commands.Cog):
         embed = discord.Embed(
             title="Member Joined",
             description=f"Welcome {member.mention} to the server! Please familiarize yourself with the rules and enjoy your stay!",
-            color=discord.Color.green()
+            color=discord.Color.green(),
         )
         embed.set_footer(text=f"Joined at: {member.joined_at.strftime('%Y-%m-%d %H:%M')}")
         await join_leave_channel.send(embed=embed)
@@ -102,7 +99,7 @@ class Logger(commands.Cog):
         detail_embed.add_field(name="Account Age", value=account_age, inline=False)
         if is_new_user:
             detail_embed.add_field(name="New User", value="Yes", inline=False)
-        
+
         await member_details_channel.send(embed=detail_embed)
 
     @commands.Cog.listener()
@@ -112,7 +109,7 @@ class Logger(commands.Cog):
             join_leave_channel = self.bot.get_channel(self.config["configuration"]["join-leave-channel"])
             if not join_leave_channel or not member.joined_at:
                 return
-            
+
             left_after = self.calculate_time_spent(member)
             embed = discord.Embed(
                 title="Member Left",
