@@ -99,7 +99,8 @@ class DatabaseManager:
             ChangeLogChannelID BIGINT,
             AnnouncementChannelID BIGINT,
             LeaveJoinChannelID BIGINT,
-            AdvancedLeaveJoinChannelID BIGINT,
+            LogChannelID BIGINT,
+            MemberDetailChannelID BIGINT,
             FOREIGN KEY (GuildID) REFERENCES serverlist (GuildID)
         );
         """
@@ -139,31 +140,62 @@ class DatabaseManager:
 
     def set_announcement_channel(self, guild_id, channel_id):
         """Set or update the announcement channel for a server."""
+        self._set_channel(guild_id, channel_id, 'AnnouncementChannelID')
+
+    def set_join_leave_channel(self, guild_id, channel_id):
+        """Set or update the join-leave channel for a server."""
+        self._set_channel(guild_id, channel_id, 'LeaveJoinChannelID')
+
+    def set_log_channel(self, guild_id, channel_id):
+        """Set or update the log channel for a server."""
+        self._set_channel(guild_id, channel_id, 'LogChannelID')
+
+    def set_member_detail_channel(self, guild_id, channel_id):
+        """Set or update the member detail channel for a server."""
+        self._set_channel(guild_id, channel_id, 'MemberDetailChannelID')
+
+    def _set_channel(self, guild_id, channel_id, column_name):
+        """Generic method to set or update a channel in the 'channels' table."""
         self.connect_to_mysql()
         if self.db and self.cursor:
             try:
-                query = """
-                INSERT INTO channels (GuildID, AnnouncementChannelID)
+                query = f"""
+                INSERT INTO channels (GuildID, {column_name})
                 VALUES (%s, %s)
-                ON DUPLICATE KEY UPDATE AnnouncementChannelID = %s
+                ON DUPLICATE KEY UPDATE {column_name} = %s
                 """
                 self.cursor.execute(query, (guild_id, channel_id, channel_id))
                 self.db.commit()
             except mysql.connector.Error as error:
-                print(f"Error setting announcement channel: {error}")
+                print(f"Error setting {column_name}: {error}")
         self.close_connection()
 
     def get_announcement_channel(self, guild_id):
         """Retrieve the announcement channel for a server."""
+        return self._get_channel(guild_id, 'AnnouncementChannelID')
+
+    def get_join_leave_channel(self, guild_id):
+        """Retrieve the join-leave channel for a server."""
+        return self._get_channel(guild_id, 'LeaveJoinChannelID')
+
+    def get_log_channel(self, guild_id):
+        """Retrieve the log channel for a server."""
+        return self._get_channel(guild_id, 'LogChannelID')
+
+    def get_member_detail_channel(self, guild_id):
+        """Retrieve the member detail channel for a server."""
+        return self._get_channel(guild_id, 'MemberDetailChannelID')
+
+    def _get_channel(self, guild_id, column_name):
+        """Generic method to retrieve a channel from the 'channels' table."""
         self.connect_to_mysql()
         if self.db and self.cursor:
             try:
-                self.cursor.execute(
-                    "SELECT AnnouncementChannelID FROM channels WHERE GuildID = %s", (guild_id,)
-                )
+                query = f"SELECT {column_name} FROM channels WHERE GuildID = %s"
+                self.cursor.execute(query, (guild_id,))
                 result = self.cursor.fetchone()
                 return result[0] if result else None
             except mysql.connector.Error as error:
-                print(f"Error retrieving announcement channel: {error}")
+                print(f"Error retrieving {column_name}: {error}")
         self.close_connection()
         return None
