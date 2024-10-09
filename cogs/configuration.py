@@ -88,8 +88,25 @@ class Configuration(commands.Cog):
             return
 
         try:
-            role_names = [role.strip() for role in roles.split(",")]  # Split the roles by commas
-            self.db_manager.set_mod_roles(interaction.guild.id, role_names)
+            # Parse the roles by their names or mentions and store their IDs
+            role_ids = []
+            role_names = []
+            for role_name_or_mention in roles.split(","):
+                role_name_or_mention = role_name_or_mention.strip()
+                # Find the role by its name or mention
+                role = discord.utils.get(interaction.guild.roles, name=role_name_or_mention) or discord.utils.get(interaction.guild.roles, mention=role_name_or_mention)
+                if role:
+                    role_ids.append(role.id)
+                    role_names.append(role.name)  # Collect role names for feedback
+
+            if not role_ids:
+                await interaction.response.send_message(
+                    "No valid roles provided. Please check the role names or mentions.", ephemeral=True
+                )
+                return
+
+            # Store role IDs in the database
+            self.db_manager.set_mod_roles(interaction.guild.id, role_ids)
             await interaction.response.send_message(
                 f"Moderator roles set to: {', '.join(role_names)}", ephemeral=True
             )
@@ -108,10 +125,18 @@ class Configuration(commands.Cog):
             return
 
         try:
-            mod_roles = self.db_manager.get_mod_roles(interaction.guild.id)
-            if mod_roles:
+            # Fetch the role IDs from the database
+            mod_role_ids = self.db_manager.get_mod_roles(interaction.guild.id)
+            if mod_role_ids:
+                # Convert role IDs to role names by fetching them from the guild
+                mod_role_names = []
+                for role_id in mod_role_ids:
+                    role = discord.utils.get(interaction.guild.roles, id=role_id)
+                    if role:
+                        mod_role_names.append(role.name)
+
                 await interaction.response.send_message(
-                    f"Moderator roles for this server are: {', '.join(mod_roles)}", ephemeral=True
+                    f"Moderator roles for this server are: {', '.join(mod_role_names)}", ephemeral=True
                 )
             else:
                 await interaction.response.send_message(
