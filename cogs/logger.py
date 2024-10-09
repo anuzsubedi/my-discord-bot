@@ -8,7 +8,7 @@ from utils.dbmanager import DatabaseManager
 class Logger(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.db_manager = DatabaseManager()  # Instantiate DatabaseManager
+        self.db_manager = DatabaseManager()
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
@@ -24,12 +24,26 @@ class Logger(commands.Cog):
         try:
             join_leave_channel, member_details_channel = await self.get_channels(member.guild.id)
 
-            if not join_leave_channel or not member_details_channel:
+            # Check if both channels are properly retrieved
+            if not join_leave_channel:
+                print("Join-Leave channel not found.")
                 return
+            if not member_details_channel:
+                print("Member details channel not found.")
 
             account_age, is_new_user = self.calculate_account_age(member)
-            await self.send_welcome_message(member, join_leave_channel, account_age)
-            await self.log_member_details(member, member_details_channel, account_age, is_new_user)
+            
+            # Send the welcome message if the join_leave_channel exists
+            if join_leave_channel:
+                await self.send_welcome_message(member, join_leave_channel, account_age)
+            else:
+                print(f"Welcome message not sent for {member.name}: Channel missing.")
+
+            # Log the member details if the member_details_channel exists
+            if member_details_channel:
+                await self.log_member_details(member, member_details_channel, account_age, is_new_user)
+            else:
+                print(f"Member details log not sent for {member.name}: Channel missing.")
         except Exception as e:
             print(f"An error occurred while processing member join: {e}")
 
