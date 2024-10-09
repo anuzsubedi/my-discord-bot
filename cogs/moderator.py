@@ -12,7 +12,8 @@ class Moderator(commands.Cog):
     async def check_mod(self, interaction):
         """Check if the user has a moderator role."""
         try:
-            mod_roles = self.db_manager.get_mod_roles(interaction.guild.id)  # Fetch mod roles from the database
+            # Fetch moderator roles from the database
+            mod_roles = self.db_manager.get_mod_roles(interaction.guild.id)
             if not mod_roles:
                 await interaction.response.send_message(
                     "Moderator roles are not configured properly in the database.",
@@ -21,7 +22,15 @@ class Moderator(commands.Cog):
                 return False
 
             # Check if the user has any of the moderator roles
-            return any(role.name in mod_roles for role in interaction.user.roles)
+            if any(role.name in mod_roles for role in interaction.user.roles):
+                return True
+            else:
+                await interaction.response.send_message(
+                    "You do not have permission to use this command. Moderator access required.",
+                    ephemeral=True,
+                )
+                return False
+
         except Exception as e:
             print(f"Error checking mod roles: {e}")
             await interaction.response.send_message(
@@ -63,8 +72,6 @@ class Moderator(commands.Cog):
     async def announce(self, interaction: discord.Interaction, message: str):
         """Send an announcement to the announcement channel."""
         try:
-            message = message.replace("\\n", "\n")
-
             if interaction.user.guild_permissions.administrator or await self.check_mod(interaction):
                 announcement_channel_id = self.db_manager.get_announcement_channel(interaction.guild.id)
 
@@ -84,7 +91,7 @@ class Moderator(commands.Cog):
                     )
                     return
 
-                await announcement_channel.send(message)
+                await announcement_channel.send(message.replace("\\n", "\n"))
                 await interaction.response.send_message(
                     f"Announcement sent to {announcement_channel.mention}.",
                     ephemeral=True,
