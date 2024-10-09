@@ -24,26 +24,28 @@ class Logger(commands.Cog):
         try:
             join_leave_channel, member_details_channel = await self.get_channels(member.guild.id)
 
-            # Check if both channels are properly retrieved
+            # Log the channel retrieval for debugging
             if not join_leave_channel:
-                print("Join-Leave channel not found.")
-                return
+                print(f"Join-Leave channel not found for guild: {member.guild.id}")
             if not member_details_channel:
-                print("Member details channel not found.")
+                print(f"Member details channel not found for guild: {member.guild.id}")
 
             account_age, is_new_user = self.calculate_account_age(member)
-            
+
             # Send the welcome message if the join_leave_channel exists
             if join_leave_channel:
                 await self.send_welcome_message(member, join_leave_channel, account_age)
+                print(f"Welcome message sent to {member.name} in {join_leave_channel.id}.")
             else:
-                print(f"Welcome message not sent for {member.name}: Channel missing.")
+                print(f"Join-Leave channel missing, welcome message not sent for {member.name}.")
 
             # Log the member details if the member_details_channel exists
             if member_details_channel:
                 await self.log_member_details(member, member_details_channel, account_age, is_new_user)
+                print(f"Member details log sent for {member.name} in {member_details_channel.id}.")
             else:
                 print(f"Member details log not sent for {member.name}: Channel missing.")
+                
         except Exception as e:
             print(f"An error occurred while processing member join: {e}")
 
@@ -56,6 +58,9 @@ class Logger(commands.Cog):
             join_leave_channel = self.bot.get_channel(join_leave_channel_id) if join_leave_channel_id else None
             member_details_channel = self.bot.get_channel(member_details_channel_id) if member_details_channel_id else None
 
+            # Log channel retrieval for debugging
+            print(f"Join-Leave Channel ID: {join_leave_channel_id}, Member Details Channel ID: {member_details_channel_id}")
+            
             return join_leave_channel, member_details_channel
         except Exception as e:
             print(f"An error occurred while retrieving channels: {e}")
