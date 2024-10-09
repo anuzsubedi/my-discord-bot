@@ -9,8 +9,21 @@ class Configuration(commands.Cog):
         self.bot = bot
         self.db_manager = DatabaseManager()
 
+    async def is_admin(self, interaction: discord.Interaction):
+        """Check if the user is an administrator."""
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message(
+                "You do not have permission to use this command. Administrator access required.",
+                ephemeral=True
+            )
+            return False
+        return True
+
     async def set_channel(self, interaction: discord.Interaction, channel: discord.TextChannel, set_channel_method, channel_type: str):
         """Generic method to set a channel and handle errors."""
+        if not await self.is_admin(interaction):
+            return
+
         try:
             set_channel_method(interaction.guild.id, channel.id)
             await interaction.response.send_message(
@@ -65,6 +78,50 @@ class Configuration(commands.Cog):
     ):
         """Command to set the member detail log channel."""
         await self.set_channel(interaction, channel, self.db_manager.set_member_detail_channel, "Member Detail")
+
+    @app_commands.command(
+        name="set_mod_roles", description="Set the moderator roles for the server."
+    )
+    async def set_mod_roles(self, interaction: discord.Interaction, roles: str):
+        """Command to set moderator roles for the server."""
+        if not await self.is_admin(interaction):
+            return
+
+        try:
+            role_names = [role.strip() for role in roles.split(",")]  # Split the roles by commas
+            self.db_manager.set_mod_roles(interaction.guild.id, role_names)
+            await interaction.response.send_message(
+                f"Moderator roles set to: {', '.join(role_names)}", ephemeral=True
+            )
+        except Exception as e:
+            await interaction.response.send_message(
+                "An error occurred while setting the moderator roles.", ephemeral=True
+            )
+            print(f"An error occurred in set_mod_roles: {e}")
+
+    @app_commands.command(
+        name="get_mod_roles", description="Get the moderator roles for the server."
+    )
+    async def get_mod_roles(self, interaction: discord.Interaction):
+        """Command to retrieve moderator roles for the server."""
+        if not await self.is_admin(interaction):
+            return
+
+        try:
+            mod_roles = self.db_manager.get_mod_roles(interaction.guild.id)
+            if mod_roles:
+                await interaction.response.send_message(
+                    f"Moderator roles for this server are: {', '.join(mod_roles)}", ephemeral=True
+                )
+            else:
+                await interaction.response.send_message(
+                    "No moderator roles have been set for this server.", ephemeral=True
+                )
+        except Exception as e:
+            await interaction.response.send_message(
+                "An error occurred while retrieving the moderator roles.", ephemeral=True
+            )
+            print(f"An error occurred in get_mod_roles: {e}")
 
 
 async def setup(bot):
