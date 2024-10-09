@@ -1,7 +1,3 @@
-Here's the draft for your updated `README.md` file based on your latest changes:
-
----
-
 # My Discord Bot
 
 I initially created this bot for personal use, but I decided to open-source it to benefit others as well. Over time, the bot has evolved to support multiple servers and use a MySQL database for configuration, making it more scalable and flexible.
@@ -97,7 +93,3 @@ Ensure the `config.yaml` file is present in the root directory, and the bot will
 ## Contributing
 
 Feel free to open issues or submit pull requests if you would like to contribute to the bot's development. All feedback and suggestions are welcome!
-
----
-
-Let me know if you need any changes or additions!
