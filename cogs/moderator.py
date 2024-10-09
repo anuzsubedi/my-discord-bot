@@ -13,7 +13,7 @@ class Moderator(commands.Cog):
         """Check if the user has a moderator role based on role IDs."""
         try:
             # Fetch moderator role IDs from the database
-            mod_role_ids = self.db_manager.get_mod_roles(interaction.guild.id)  # Example: [('<@&1274098935702622310>',)]
+            mod_role_ids = self.db_manager.get_mod_roles(interaction.guild.id)  # This should return a list of role IDs as integers
             
             if not mod_role_ids:
                 await interaction.response.send_message(
@@ -22,19 +22,8 @@ class Moderator(commands.Cog):
                 )
                 return False
 
-            # Clean and extract role IDs from the fetched data
-            mod_role_ids_cleaned = []
-            for role in mod_role_ids:
-                role_id_str = role[0]  # Get the string from the tuple
-                if role_id_str.startswith('<@&') and role_id_str.endswith('>'):
-                    # Safely extract the numeric part of the role ID
-                    try:
-                        mod_role_ids_cleaned.append(int(role_id_str[3:-1]))
-                    except ValueError:
-                        print(f"Error converting role ID {role_id_str} to integer.")
-
             # Check if the user has any of the moderator roles by comparing role IDs
-            if any(role.id in mod_role_ids_cleaned for role in interaction.user.roles):
+            if any(role.id in mod_role_ids for role in interaction.user.roles):
                 return True
             else:
                 await interaction.response.send_message(
@@ -49,6 +38,7 @@ class Moderator(commands.Cog):
                 "An error occurred while checking moderator roles.", ephemeral=True
             )
             return False
+
 
 
 
