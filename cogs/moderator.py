@@ -23,7 +23,15 @@ class Moderator(commands.Cog):
                 return False
 
             # Clean and extract role IDs from the fetched data
-            mod_role_ids_cleaned = [int(role[0][3:-1]) for role in mod_role_ids]  # Extract the numerical role ID
+            mod_role_ids_cleaned = []
+            for role in mod_role_ids:
+                role_id_str = role[0]  # Get the string from the tuple
+                if role_id_str.startswith('<@&') and role_id_str.endswith('>'):
+                    # Safely extract the numeric part of the role ID
+                    try:
+                        mod_role_ids_cleaned.append(int(role_id_str[3:-1]))
+                    except ValueError:
+                        print(f"Error converting role ID {role_id_str} to integer.")
 
             # Check if the user has any of the moderator roles by comparing role IDs
             if any(role.id in mod_role_ids_cleaned for role in interaction.user.roles):
@@ -41,6 +49,7 @@ class Moderator(commands.Cog):
                 "An error occurred while checking moderator roles.", ephemeral=True
             )
             return False
+
 
 
     @commands.Cog.listener()
