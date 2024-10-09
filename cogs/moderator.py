@@ -9,13 +9,24 @@ class Moderator(commands.Cog):
         self.bot = bot
         self.db_manager = db.DatabaseManager()
 
-    def check_mod(self, ctx):
+    async def check_mod(self, interaction):
         """Check if the user has a moderator role."""
         try:
-            mod_roles = self.db_manager.get_mod_roles(ctx.guild.id)  # Fetch mod roles from the database
-            return any(role.name in mod_roles for role in ctx.user.roles)
+            mod_roles = self.db_manager.get_mod_roles(interaction.guild.id)  # Fetch mod roles from the database
+            if not mod_roles:
+                await interaction.response.send_message(
+                    "Moderator roles are not configured properly in the database.",
+                    ephemeral=True,
+                )
+                return False
+
+            # Check if the user has any of the moderator roles
+            return any(role.name in mod_roles for role in interaction.user.roles)
         except Exception as e:
             print(f"Error checking mod roles: {e}")
+            await interaction.response.send_message(
+                "An error occurred while checking moderator roles.", ephemeral=True
+            )
             return False
 
     @commands.Cog.listener()
@@ -33,7 +44,7 @@ class Moderator(commands.Cog):
                     "You are eligible to use moderator commands. You are an administrator.",
                     ephemeral=True,
                 )
-            elif self.check_mod(interaction):
+            elif await self.check_mod(interaction):
                 await interaction.response.send_message(
                     "You are eligible to use moderator commands. You are a moderator.",
                     ephemeral=True,
@@ -54,7 +65,7 @@ class Moderator(commands.Cog):
         try:
             message = message.replace("\\n", "\n")
 
-            if interaction.user.guild_permissions.administrator or self.check_mod(interaction):
+            if interaction.user.guild_permissions.administrator or await self.check_mod(interaction):
                 announcement_channel_id = self.db_manager.get_announcement_channel(interaction.guild.id)
 
                 if not announcement_channel_id:
@@ -93,7 +104,7 @@ class Moderator(commands.Cog):
     async def embed_announce(self, interaction: discord.Interaction, title: str, description: str):
         """Send an announcement as an embed to the announcement channel."""
         try:
-            if interaction.user.guild_permissions.administrator or self.check_mod(interaction):
+            if interaction.user.guild_permissions.administrator or await self.check_mod(interaction):
                 announcement_channel_id = self.db_manager.get_announcement_channel(interaction.guild.id)
 
                 if not announcement_channel_id:
@@ -140,7 +151,7 @@ class Moderator(commands.Cog):
     ):
         """Send a message as the bot in a specified channel."""
         try:
-            if interaction.user.guild_permissions.administrator or self.check_mod(interaction):
+            if interaction.user.guild_permissions.administrator or await self.check_mod(interaction):
                 await channel.send(message.replace("\\n", "\n"))
                 await interaction.response.send_message(
                     f"Message sent to {channel.mention}.", ephemeral=True
@@ -165,7 +176,7 @@ class Moderator(commands.Cog):
     ):
         """Send an embed message as the bot in a specified channel."""
         try:
-            if interaction.user.guild_permissions.administrator or self.check_mod(interaction):
+            if interaction.user.guild_permissions.administrator or await self.check_mod(interaction):
                 embed = discord.Embed(
                     title=title,
                     description=description.replace("\\n", "\n"),
