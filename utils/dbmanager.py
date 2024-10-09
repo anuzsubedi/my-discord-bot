@@ -198,7 +198,7 @@ class DatabaseManager:
 
     def set_member_detail_channel(self, guild_id, channel_id):
         """Set or update the member detail channel for a server."""
-        self._set_channel(guild_id, channel_id, 'MemberDetailChannelID')
+        self._set_channel(guild_id, channel_id, 'AdvancedLeaveJoinChannelID')
 
     def _set_channel(self, guild_id, channel_id, column_name):
         """Generic method to set or update a channel in the 'channels' table."""
@@ -230,7 +230,7 @@ class DatabaseManager:
 
     def get_member_detail_channel(self, guild_id):
         """Retrieve the member detail channel for a server."""
-        return self._get_channel(guild_id, 'MemberDetailChannelID')
+        return self._get_channel(guild_id, 'AdvancedLeaveJoinChannelID')
 
     def _get_channel(self, guild_id, column_name):
         """Generic method to retrieve a channel from the 'channels' table."""
